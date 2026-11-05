@@ -1,0 +1,1038 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>noacli</class>
+ <widget class="QMainWindow" name="noacli">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>612</width>
+    <height>297</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>noacli</string>
+  </property>
+  <property name="dockNestingEnabled">
+   <bool>true</bool>
+  </property>
+  <property name="dockOptions">
+   <set>QMainWindow::AllowNestedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks|QMainWindow::GroupedDragging</set>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_5">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Minimum</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="commandEditor" name="commandEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>612</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="historyMenu">
+    <property name="title">
+     <string>History</string>
+    </property>
+    <addaction name="actionlastCommand"/>
+    <addaction name="actionsave_history"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuViews">
+    <property name="title">
+     <string>Views</string>
+    </property>
+    <addaction name="actionShowDocks"/>
+    <addaction name="actionHideDocks"/>
+    <addaction name="actionTabifyDocks"/>
+    <addaction name="actionDock_all"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuJobs">
+    <property name="title">
+     <string>Jobs</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="actionFavorites_editor"/>
+    <addaction name="actionGsettings"/>
+    <addaction name="actionEnvironment_Variables"/>
+    <addaction name="actionButtonDockEditor"/>
+    <addaction name="actionEdit_saved_searches"/>
+    <addaction name="actionEditor_font"/>
+    <addaction name="actionHelp"/>
+    <addaction name="separator"/>
+    <addaction name="actionSync_settings"/>
+    <addaction name="separator"/>
+    <addaction name="actionGeoSave"/>
+    <addaction name="actionGeoRestore"/>
+    <addaction name="actionDeleteProfile"/>
+   </widget>
+   <addaction name="historyMenu"/>
+   <addaction name="menuJobs"/>
+   <addaction name="menuViews"/>
+   <addaction name="menuSettings"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="myDock" name="history">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>1</horstretch>
+     <verstretch>2</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>524287</width>
+     <height>524287</height>
+    </size>
+   </property>
+   <property name="floating">
+    <bool>false</bool>
+   </property>
+   <property name="windowTitle">
+    <string>History</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>4</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QLineEdit" name="historySearch">
+       <property name="toolTip">
+        <string>Filter history</string>
+       </property>
+       <property name="frame">
+        <bool>true</bool>
+       </property>
+       <property name="placeholderText">
+        <string>search history</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="historyView" name="historyView">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>2</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+       <property name="horizontalScrollBarPolicy">
+        <enum>Qt::ScrollBarAsNeeded</enum>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QAbstractScrollArea::AdjustToContents</enum>
+       </property>
+       <property name="textElideMode">
+        <enum>Qt::ElideMiddle</enum>
+       </property>
+       <property name="horizontalScrollMode">
+        <enum>QAbstractItemView::ScrollPerPixel</enum>
+       </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="cornerButtonEnabled">
+        <bool>true</bool>
+       </property>
+       <attribute name="horizontalHeaderStretchLastSection">
+        <bool>true</bool>
+       </attribute>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="myDock" name="jobManager">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>2</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>88</width>
+     <height>109</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Job manager</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>4</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_5">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QTableView" name="jobTableView">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>2</horstretch>
+         <verstretch>2</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QAbstractScrollArea::AdjustToContents</enum>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::SingleSelection</enum>
+       </property>
+       <property name="textElideMode">
+        <enum>Qt::ElideMiddle</enum>
+       </property>
+       <property name="sortingEnabled">
+        <bool>false</bool>
+       </property>
+       <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="horizontalHeaderStretchLastSection">
+        <bool>true</bool>
+       </attribute>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="myDock" name="smallOutputDock">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+     <horstretch>1</horstretch>
+     <verstretch>1</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>Small output</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>4</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QToolButton" name="dupOutput">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Copy output to a new window</string>
+         </property>
+         <property name="text">
+          <string>dup</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="logOutputButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>log</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="killButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>kill</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="keepOutput">
+         <property name="toolTip">
+          <string>Keep or (or clear) output between commands</string>
+         </property>
+         <property name="text">
+          <string>keep</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="smallOutput" name="smallOutputView">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>1</horstretch>
+         <verstretch>1</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="myDock" name="logDock">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+     <horstretch>1</horstretch>
+     <verstretch>2</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>Log viewer</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>4</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QVBoxLayout" name="verticalLayout_6">
+     <item>
+      <layout class="QHBoxLayout" name="dockTools">
+       <item>
+        <widget class="QCheckBox" name="checkBox">
+         <property name="text">
+          <string>follow</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="logSearch">
+         <property name="placeholderText">
+          <string>Search log</string>
+         </property>
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="logOutput" name="logBrowser">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>1</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="actionHistory">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>History</string>
+   </property>
+  </action>
+  <action name="actionButton_box">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Button box</string>
+   </property>
+  </action>
+  <action name="actionButton_editor">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Button editor</string>
+   </property>
+  </action>
+  <action name="actionJob_manager">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Job manager</string>
+   </property>
+  </action>
+  <action name="actionlastCommand">
+   <property name="text">
+    <string>last command</string>
+   </property>
+  </action>
+  <action name="actionShowDocks">
+   <property name="text">
+    <string>Show all</string>
+   </property>
+  </action>
+  <action name="actionHideDocks">
+   <property name="text">
+    <string>Hide all</string>
+   </property>
+  </action>
+  <action name="actionsave_history">
+   <property name="text">
+    <string>Save history</string>
+   </property>
+  </action>
+  <action name="actionGsettings">
+   <property name="text">
+    <string>General settings</string>
+   </property>
+  </action>
+  <action name="actionFavorites_editor">
+   <property name="text">
+    <string>Favorites editor</string>
+   </property>
+  </action>
+  <action name="actionGeoSave">
+   <property name="text">
+    <string>Save window Geometry</string>
+   </property>
+  </action>
+  <action name="actionGeoRestore">
+   <property name="text">
+    <string>Restore window geometry</string>
+   </property>
+  </action>
+  <action name="actionDeleteProfile">
+   <property name="text">
+    <string>Delete profile</string>
+   </property>
+  </action>
+  <action name="actionSync_settings">
+   <property name="text">
+    <string>Sync settings</string>
+   </property>
+  </action>
+  <action name="actionTabifyDocks">
+   <property name="text">
+    <string>Tabify all</string>
+   </property>
+  </action>
+  <action name="actionEnvironment_Variables">
+   <property name="text">
+    <string>Environment Variables</string>
+   </property>
+  </action>
+  <action name="actionEditor_font">
+   <property name="text">
+    <string>Editor font</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+  </action>
+  <action name="actionButtonDockEditor">
+   <property name="text">
+    <string>Button dock editor</string>
+   </property>
+  </action>
+  <action name="actionEdit_saved_searches">
+   <property name="text">
+    <string>Edit saved searches</string>
+   </property>
+  </action>
+  <action name="actionDock_all">
+   <property name="text">
+    <string>Dock all</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>commandEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header>noacli</header>
+   <slots>
+    <signal>command_to_run(QString,QModelIndex)</signal>
+    <signal>newFavorite(QString)</signal>
+    <signal>command_to_run(QString,QPersistentModelIndex)</signal>
+    <slot>acceptHistory(QModelIndex)</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>historyView</class>
+   <extends>QTableView</extends>
+   <header>noacli</header>
+   <slots>
+    <signal>newFavorite(QString)</signal>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>smallOutput</class>
+   <extends>QTextBrowser</extends>
+   <header>lib/smalloutput</header>
+   <slots>
+    <signal>sendToLog(PyQt_PyObject)</signal>
+    <signal>buttonState(bool)</signal>
+    <signal>gotNewLines(int)</signal>
+    <slot>smallDup()</slot>
+    <slot>smallKeepToggle(bool)</slot>
+    <slot>smallKill()</slot>
+    <slot>smallLog()</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>logOutput</class>
+   <extends>QTextBrowser</extends>
+   <header>lib/logoutput</header>
+   <slots>
+    <signal>gotNewLines(int)</signal>
+    <slot>setFollowCheck(int)</slot>
+    <slot>simpleFindNew(QString)</slot>
+    <slot>simpleFind2()</slot>
+    <slot>receiveJob(PyQt_PyObject)</slot>
+    <slot>newLines(int)</slot>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>myDock</class>
+   <extends>QDockWidget</extends>
+   <header>lib/mydock</header>
+   <container>1</container>
+   <slots>
+    <slot>newLines(int)</slot>
+   </slots>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>actionHideDocks</sender>
+   <signal>triggered()</signal>
+   <receiver>noacli</receiver>
+   <slot>hideAllDocks()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>429</x>
+     <y>238</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShowDocks</sender>
+   <signal>triggered()</signal>
+   <receiver>noacli</receiver>
+   <slot>showAllDocks()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>429</x>
+     <y>238</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>historyView</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>commandEdit</receiver>
+   <slot>acceptHistory(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>52</x>
+     <y>93</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>75</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>commandEdit</sender>
+   <signal>command_to_run(QString,QPersistentModelIndex)</signal>
+   <receiver>noacli</receiver>
+   <slot>runCommand(QString,QPersistentModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>124</x>
+     <y>200</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>138</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>jobTableView</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>noacli</receiver>
+   <slot>jobDoubleClicked(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>187</x>
+     <y>117</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>308</x>
+     <y>117</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionsave_history</sender>
+   <signal>triggered()</signal>
+   <receiver>noacli</receiver>
+   <slot>actionSaveHistory()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>214</x>
+     <y>133</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionlastCommand</sender>
+   <signal>triggered()</signal>
+   <receiver>noacli</receiver>
+   <slot>runLastCommand()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>214</x>
+     <y>133</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionGsettings</sender>
+   <signal>triggered()</signal>
+   <receiver>noacli</receiver>
+   <slot>actionGsettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>214</x>
+     <y>133</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>historyView</sender>
+   <signal>newFavorite(QString)</signal>
+   <receiver>noacli</receiver>
+   <slot>addFavorite(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>37</x>
+     <y>132</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>56</x>
+     <y>182</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionGeoSave</sender>
+   <signal>triggered()</signal>
+   <receiver>noacli</receiver>
+   <slot>actionSaveGeometry()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>214</x>
+     <y>133</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionGeoRestore</sender>
+   <signal>triggered()</signal>
+   <receiver>noacli</receiver>
+   <slot>actionRestoreGeometry()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>214</x>
+     <y>133</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dupOutput</sender>
+   <signal>clicked()</signal>
+   <receiver>smallOutputView</receiver>
+   <slot>smallDup()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>252</x>
+     <y>77</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>127</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>keepOutput</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>smallOutputView</receiver>
+   <slot>smallKeepToggle(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>398</x>
+     <y>76</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>122</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSync_settings</sender>
+   <signal>triggered()</signal>
+   <receiver>noacli</receiver>
+   <slot>syncSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>264</x>
+     <y>148</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>commandEdit</sender>
+   <signal>newFavorite(QString)</signal>
+   <receiver>noacli</receiver>
+   <slot>addFavorite(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>315</x>
+     <y>226</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>316</x>
+     <y>270</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionEnvironment_Variables</sender>
+   <signal>triggered()</signal>
+   <receiver>noacli</receiver>
+   <slot>actionEsettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>264</x>
+     <y>148</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>logBrowser</receiver>
+   <slot>setFollowCheck(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>462</x>
+     <y>56</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>128</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>logSearch</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>logBrowser</receiver>
+   <slot>simpleFindNew(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>541</x>
+     <y>58</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>128</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>logSearch</sender>
+   <signal>returnPressed()</signal>
+   <receiver>logBrowser</receiver>
+   <slot>simpleFind2()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>577</x>
+     <y>60</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>602</x>
+     <y>128</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>logOutputButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>smallOutputView</receiver>
+   <slot>smallLog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>279</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>128</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>smallOutputView</sender>
+   <signal>sendToLog(PyQt_PyObject)</signal>
+   <receiver>logBrowser</receiver>
+   <slot>receiveJob(PyQt_PyObject)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>358</x>
+     <y>135</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>470</x>
+     <y>137</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>logBrowser</sender>
+   <signal>gotNewLines(int)</signal>
+   <receiver>logDock</receiver>
+   <slot>newLines(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>474</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>459</x>
+     <y>87</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>smallOutputView</sender>
+   <signal>gotNewLines(int)</signal>
+   <receiver>smallOutputDock</receiver>
+   <slot>newLines(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>307</x>
+     <y>94</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>295</x>
+     <y>117</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionEditor_font</sender>
+   <signal>triggered()</signal>
+   <receiver>noacli</receiver>
+   <slot>pickDefaultFont()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>305</x>
+     <y>148</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionHelp</sender>
+   <signal>triggered()</signal>
+   <receiver>noacli</receiver>
+   <slot>showReadme()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>305</x>
+     <y>148</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDeleteProfile</sender>
+   <signal>triggered()</signal>
+   <receiver>noacli</receiver>
+   <slot>myDeleteProfile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>214</x>
+     <y>133</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionButtonDockEditor</sender>
+   <signal>triggered()</signal>
+   <receiver>noacli</receiver>
+   <slot>editButtonDocks()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>305</x>
+     <y>148</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>showAllDocks()</slot>
+  <slot>hideAllDocks()</slot>
+  <slot>runCommand(QString,QPersistentModelIndex)</slot>
+  <slot>runLastCommand()</slot>
+  <slot>jobDoubleClicked(QModelIndex)</slot>
+  <slot>actionSaveHistory()</slot>
+  <slot>actionGsettings()</slot>
+  <slot>addFavorite(QString)</slot>
+  <slot>actionSaveGeometry()</slot>
+  <slot>actionRestoreGeometry()</slot>
+  <slot>myDeleteProfile()</slot>
+  <slot>smallDup()</slot>
+  <slot>smallKeepToggle(bool)</slot>
+  <slot>syncSettings()</slot>
+  <slot>actionEsettings()</slot>
+  <slot>pickDefaultFont()</slot>
+  <slot>pickBrowserFont()</slot>
+  <slot>showReadme()</slot>
+  <slot>editButtonDocks()</slot>
+ </slots>
+</ui>

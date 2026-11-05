@@ -1,0 +1,581 @@
+
+__license__   = 'GPL v3'
+__copyright__ = '2023, 2026 Steven Dick <kg4ydw@gmail.com>'
+
+# handle search results and bookmarks
+
+from functools import partial
+from bisect import bisect_left
+
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtCore import Qt, pyqtSignal, QTimer
+from PyQt6.QtGui import QTextCursor, QColor
+from PyQt6.QtWidgets import QDockWidget, QTextEdit, QMenu
+
+from lib.searchdock_ui import Ui_searchDock
+from lib.datamodels import itemListModel
+
+from lib.colorpicker import ColorPicker
+
+colorpicker = ColorPicker()
+
+## class map
+# searchDock -> selList --> selItem
+# searchDockGroup -> groupList -> groupItem
+# baseSearchDock { searchDock, searchDockGroup }
+# itemListModel { selList, groupList }
+## duck type properties (reimplemented not inherited from base classes)
+# itemListModel:
+#   appendItem must accept output from interval and convert into the right item
+# baseSearchDock
+#   gotIndex (refactor this to always use cursors?) jump to loc in document
+#   findSelection: given a cursor, find the exact item
+#   findSelectionBefore: given a cursor, find the previous item
+#   resume helpers: iterval restart itemType, lastFound findMore
+# without itemType a slower non-batch algorithm is forced
+
+class selItem():
+    def __init__(self, cursor, context=True):
+        # save in case it goes out of context
+        self.cursor = cursor
+        self.text = cursor.selectedText()
+        self.line = cursor.blockNumber()
+        # XX get pretext and posttext
+        pos = cursor.position()
+        anchor = cursor.anchor()
+        contextChars = 20       # XXX setting
+        if anchor>pos:          # swap!!
+            (pos,anchor) = (anchor,pos)
+            cursor.setPosition(anchor, QTextCursor.MoveMode.MoveAnchor)
+            cursor.setPosition(pos, QTextCursor.MoveMode.KeepAnchor)
+        if not context or cursor.atBlockStart():
+            self.pretext = ''
+        else:
+            c = QTextCursor(cursor)
+            c.setPosition(anchor, QTextCursor.MoveMode.KeepAnchor)
+            c.movePosition(QTextCursor.MoveOperation.PreviousCharacter, QTextCursor.MoveMode.KeepAnchor, contextChars)
+            if self.line!=c.blockNumber():  # fell off, start over
+                #c = QTextCursor(cursor)
+                c.setPosition(anchor, QTextCursor.MoveMode.KeepAnchor)
+                c.movePosition(QTextCursor.MoveOperation.StartOfBlock, QTextCursor.MoveMode.KeepAnchor, 1)
+            self.pretext = c.selectedText()
+        if not context or cursor.atBlockEnd():
+            self.posttext = ''
+        else:
+            c = QTextCursor(cursor)
+            c.clearSelection()
+            c.movePosition(QTextCursor.MoveOperation.NextCharacter, QTextCursor.MoveMode.KeepAnchor, contextChars)
+            if self.line!=c.blockNumber():  # fell off, start over
+                c.setPosition(pos, QTextCursor.MoveMode.KeepAnchor)
+                #c = QTextCursor(cursor)
+                c.movePosition(QTextCursor.MoveOperation.EndOfBlock, QTextCursor.MoveMode.KeepAnchor, 1)
+            self.posttext = c.selectedText()
+
+
+class selList(itemListModel):
+    def __init__(self):
+        super().__init__(['pre','item','post'])
+        self.color = None
+        self.haspre = self.hasitem = self.haspost = False
+        self.itemType = selItem
+
+    def setSel(self, extraSelections):
+        self.removeRows(0, len(self._data),None)  # XX always purge?
+        # insert rows in batches for better performance
+        rows = []
+        for sel in extraSelections:
+            if sel.cursor.position() or sel.cursor.hasSelection():  # skip stale highlights
+                item = selItem(sel.cursor)
+                # self.appendItem(item) # too slow, do this later in batch
+                rows.append(item)
+                if item.pretext: self.haspre = True
+                if item.text: self.hasitem = True
+                if item.posttext: self.haspost = True
+            #if len(rows)&7==0: # this would make it negligibly faster but more chunky
+            QtCore.QCoreApplication.processEvents()
+            if len(rows)>=1000:  # XXX SETTING
+                self.insertRowsAt(1,rows)
+                rows=[]
+        if rows:                # and the leftovers
+            self.insertRowsAt(1,rows)
+
+    def appendItem(self, item):
+        if isinstance(item,QTextCursor):
+            item = selItem(item)
+        super().appendItem(item)
+        # XXXXX also trigger highilghting if that's already enabled
+
+    def headerData(self, col, orientation, role):
+        if orientation==Qt.Orientation.Horizontal and col==1 and role==Qt.ItemDataRole.BackgroundRole and self.color:
+            return self.color
+        if role==Qt.ItemDataRole.DisplayRole and orientation==Qt.Orientation.Vertical and col<len(self._data):
+            return str(self._data[col].line+1)
+        else:
+            return super().headerData(col, orientation, role)
+
+    def setColor(self, c):
+        self.color = c
+        self.headerDataChanged.emit(Qt.Orientation.Horizontal, 1, 1)
+
+    def data(self, index, role):
+        if role==Qt.ItemDataRole.TextAlignmentRole:  # too bad can't set elide style too
+            col = index.column()
+            if col==0: return Qt.AlignmentFlag.AlignRight
+            elif col==1: return Qt.AlignmentFlag.AlignCenter
+            elif col==2: return Qt.AlignmentFlag.AlignLeft
+        item = self.getItem(index)
+        if not item or role not in (Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.EditRole): return None
+        col = index.column()
+        if col==0: return item.pretext
+        elif col==1: return item.text
+        elif col==2: return item.posttext
+        else: return None
+
+    def lastFound(self):
+        if not self._data: return None
+        return self._data[-1].cursor  # this could be the block?
+
+# common search dock functionality
+class baseSearchDock(QDockWidget):
+    def __init__(self, parent, title, favcol, saved, auto):
+        super().__init__(parent)
+        self.autotriggered = auto
+        self.ui = Ui_searchDock()
+        self.ui.setupUi(self)
+        self.saved = saved
+        self.deffav = self.favcol = favcol
+        self.model = None  # set this in subclass
+        tv = self.ui.tableView
+        tv.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
+        tv.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
+        tvh = tv.horizontalHeader()
+        tvh.sectionDoubleClicked.connect(tv.resizeColumnToContents)
+        tvh.sectionClicked.connect(self.setFav)
+        tvh.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        tvh.customContextMenuRequested.connect(self.headerContextMenu)
+        tv.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        tv.customContextMenuRequested.connect(self.tableContextMenu)
+        self.topLevelChanged.connect(self.resizeOnFloat)
+        
+        if saved and saved.name and (not title or title==saved.sexp):
+            title = saved.name
+        if title:
+            self.setWindowTitle(title)
+        parent.addSearchDock(self, auto and saved and not saved.findshow)
+        # self.hideCols()  # do this in subclass after model is set
+        self.columnTimer = None  # set timer after model is set
+
+    def modelInit(self):
+        # call this after setting the model so the view resizes properly
+        # needed if you populate the module incrementally
+        if not self.columnTimer:  # initialize model and timer both XXX
+            self.columnTimer = QTimer()
+            self.columnTimer.setSingleShot(True)
+            self.columnTimer.timeout.connect(self.ui.tableView.resizeColumnsToContents)
+        self.columnTimer.start(1000)
+        # played with elaborite algorithms here but it just made
+        # things significantly slower just to check, without making it
+        # look significantly better.  So just resize once after a
+        # while.  If it still looks stupid, user can double click to fix it.
+
+    def resizeOnFloat(self, floatw):
+        self.ui.tableView.resizeColumnsToContents()
+        if floatw:
+            self.adjustSize()
+            # this is broken in wayland of course XXX
+            # XXX could do better but not without bypassing wayland
+
+    def hideCols(self):
+        # note: might not work if model or headings aren't set
+        # if not self.model: return  # don't call before setting model!
+        tv = self.ui.tableView
+        if self.saved and self.saved.hideCols:
+            for si in self.saved.hideCols.split():
+                try:
+                    i = int(si)
+                    tv.setColumnHidden(i,True)
+                except:
+                    pass # whatever, ignore bad input
+            self.fixFav()
+
+    def fixFav(self):
+        tv = self.ui.tableView
+        if not tv.isColumnHidden(self.favcol):
+            return # nothing to fix
+        # try to find a visible column
+        fav = 0
+        while tv.isColumnHidden(fav):
+            fav +=1
+        # Qt6 column after last is never hidden and doesn't cause error
+        if fav >= self.model.columnCount(None):
+            # everything was hidden, fix it
+            fav = self.deffav
+            tv.setColumnHidden(fav,False)
+        self.favcol = fav
+
+    def closeEvent(self, event):
+        # if a search dock is closed, make visible the menu entry to delete them
+        super().closeEvent(event)
+        p = self.parent()
+        if p:
+            p.ui.actionDeleteClosedSearches.setVisible(True)
+            p.ui.actionDeleteClosedSearches.setEnabled(True)
+        self.stopSearch()
+
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        self.stopSearch()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        # continue building search results if not done
+        if self.model and self.model.iterval and self.model.backgroundTimer:
+            self.model.backgroundTimer.start()
+
+    @QtCore.pyqtSlot(int)
+    def setFav(self, i):
+        # clicked
+        self.favcol = i
+        # change default too?
+
+    def headerContextMenu(self, point):
+        m = QMenu()
+        t = self.ui.tableView
+        hh = self.ui.tableView.horizontalHeader()
+        col = t.columnAt(point.x())
+        m.addAction(f"Hide column {col}",partial(self.hideColumn,col))
+        # list what's hidden
+        hiddencols = [ col for col in range(hh.count())
+                  if t.isColumnHidden(col)]
+        # XX if there's too many, just show surrounding ones?
+        # but only crazy people would make a regex with huge numbers of groups
+        for col in hiddencols:
+            m.addAction(f"Show column {col}", partial(self.showColumn, col))
+        if hasattr(self,'setColor'):
+            m.addMenu(colorpicker.futureColorMenu(parent=m, act=self.setColor))
+        action = m.exec(t.mapToGlobal(point))
+
+    def tableContextMenu(self, point):
+        m = QMenu()
+        if self.model and self.model.iterval:
+            if (self.model.backgroundTimer and self.model.backgroundTimer.isActive()) or self.model.finishingSearch:
+                m.addAction("Stop searching", self.stopSearch)
+            else:
+                m.addAction("Resume searching", self.model.backgroundTimer.start)
+            if self.model.finishingSearch:
+                m.addAction(f"{self.model.rowCount(None)}")  # XX document rows?
+                pass # XXXX calculate percentage left?
+            else:
+                m.addAction("Finish searching now", self.model.finishNow)
+        if hasattr(self, 'setColor'):
+            global colorpicker
+            if m.isEmpty():
+                colorpicker.futureColorMenu(m=m, act=self.setColor)
+            else:
+                m.addMenu(colorpicker.futureColorMenu(parent=m, act=self.setColor))
+        action = m.exec(self.ui.tableView.mapToGlobal(point))
+
+    def stopSearch(self):
+        if self.model:
+            self.model.finishingSearch = False
+            if self.model.backgroundTimer:
+                self.model.backgroundTimer.stop()
+
+    # context menu triggered
+    def hideColumn(self, col):
+        self.ui.tableView.setColumnHidden(col, True)
+        self.fixFav()
+
+    def showColumn(self, col):
+        self.ui.tableView.setColumnHidden(col, False)
+
+    def setiter(self, iter, restart=None):
+        self.model.iterval = iter
+        if restart: self.restart = restart
+        # do some autofill before starting timer
+        QtCore.QCoreApplication.processEvents()
+        self.model.finishInBackground()
+
+    def findMore(self):
+        # called by readmore after new data...
+        if not self.model or self.model.iterval:
+            # search still active, don't need to do much yet
+            return
+        if hasattr(self, 'restart') and hasattr(self.model, 'lastFound'):
+            self.model.iterval = self.restart(startcursor=self.model.lastFound())
+            self.model.finishInBackground()
+
+    def reset(self):
+        if hasattr(self,'restart'):
+            self.stopSearch()
+            self.model.clear()
+            self.model.iterval = None
+            self.findMore()
+        else:
+            self.stopSearch()
+            self.close()
+            self.deleteLater()
+
+
+class searchDock(baseSearchDock):
+    showSel = pyqtSignal(list)
+    showSelDelayed = pyqtSignal()
+    hideSel = pyqtSignal(list)
+    gotoSel = pyqtSignal(QTextCursor)
+
+    def __init__(self, parent, title=None, selections=None, searchterm=None, findflags=None, saved=None, auto=False, *, restart=None, iterval=None):
+        super().__init__(parent, title, 1, saved, auto)
+
+        self.searchterm = searchterm  # XXX use these later
+        self.findflags = findflags
+        self.doHighlight = False
+
+        global colorpicker
+        color = colorpicker.nextColor()
+        self.color = QtGui.QBrush(QColor(color))
+        self.model = selList()
+        self.model.search_finished.connect(self.maybeHighlight)
+        self.restart = restart  # lamdba function
+
+        tv = self.ui.tableView
+        tv.setModel(self.model)
+        self.hideCols()
+        tv.clicked.connect(self.gotoIndex)
+        self.modelInit()
+
+        # set up delayed emit
+        self.showSelDelayed.connect(self.doDelayShowSel, Qt.ConnectionType.QueuedConnection)
+        # set up connections before the data is loaded
+        self.ui.showButton.clicked.connect(self.showHighlights)
+        self.ui.hideButton.clicked.connect(self.hideHighlights)
+
+        if selections:
+            self.setSel(selections)
+            if title and title!='Highlights':
+                # hide empty columns
+                if not self.model.haspre: tv.setColumnHidden(0,True)
+                if not self.model.hasitem:
+                    tv.setColumnHidden(1,True)
+                    if self.model.haspre: self.favcol = 0
+                    else: self.favcol = 2
+                if not self.model.haspost: tv.setColumnHidden(2,True)
+        self.model.setColor(self.color)
+
+        if saved and auto and saved.findhighlight:
+            #self.emitExtraSelections(self.showSel) # this doesn't work, too soon
+            self.showSelDelayed.emit()
+            self.doHighlight = True
+        if iterval:
+            self.setiter(iterval)
+
+    @QtCore.pyqtSlot()
+    def doDelayShowSel(self):
+        # have to delay this because our creator connects after this event
+        self.emitExtraSelections(self.showSel)
+
+    def gotoIndex(self, index):
+        item = self.model.getItem(index)
+        if item:
+            self.gotoSel.emit(item.cursor)
+
+    # opposite of gotoIndex
+    def findSelection(self, cursor):
+        # XX could this be done with a binary search? (works as is, seems fast)
+        # could binary search on cursor.blockNumber() == self.line
+        pos = cursor.position()
+        for index in self.model:
+            ic = self.model.getItem(index).cursor
+            c1 = ic.anchor()
+            c2 = ic.position()
+            if c1>c2:
+                (c1,c2) = (c2,c1)
+            if c1<=pos<=c2:
+                self.ui.tableView.setCurrentIndex(index)
+                self.ui.tableView.scrollTo(index.siblingAtColumn(self.favcol))
+                return
+        # not found
+
+    def findLastSelectionBefore(self, cursor):
+        pos = cursor.position()
+        found = None
+        if self.model:
+            found = self.model[0]
+        for index in self.model:
+            ic = self.model.getItem(index).cursor
+            c1 = ic.anchor()
+            c2 = ic.position()
+            if c1>c2:
+                (c1,c2) = (c2,c1)
+            if c1> pos: break
+            found = index
+        if found:
+            self.ui.tableView.setCurrentIndex(found)
+            self.ui.tableView.scrollTo(found.siblingAtColumn(self.favcol))
+        # restore position?
+
+    def setSel(self, extraSelections):
+        self.model.setSel(extraSelections)
+        self.ui.tableView.resizeColumnsToContents()
+
+    def addSel(self, cursor):
+        self.model.appendItem(selItem(cursor))
+        self.ui.tableView.resizeColumnsToContents()
+
+    def showHighlights(self):
+        self.doHighlight = True
+        self.emitExtraSelections(self.showSel)
+
+    def hideHighlights(self):
+        self.doHighlight = False
+        self.emitExtraSelections(self.hideSel)
+
+    # XXX connect to rowsInserted instead of search_finished!?
+    # this isn't the most responsive way but it may be the most efficent
+    def maybeHighlight(self):
+        if self.doHighlight:
+            self.emitExtraSelections(self.showSel)
+
+    def emitExtraSelections(self, signal):
+        es = []
+        for i in self.model._data:
+            e = QTextEdit.ExtraSelection()
+            e.cursor = i.cursor
+            e.format.setBackground(self.color)
+            es.append(e)
+        signal.emit(es)
+
+    def setColor(self, color):
+        self.color = QtGui.QBrush(QColor(color))
+        self.model.setColor(self.color)
+        self.emitExtraSelections(self.showSel)
+
+    def contextMenuEvent(self, event):
+        global colorpicker
+        color = colorpicker.execColorMenu(event)
+        #print(color) # DEBUG
+        if color: self.setColor(color)
+
+
+class searchDockGroup(baseSearchDock):
+    # show groups from regex searches
+    # loosely duplicate searchDock but with major differences (and stuff left out
+    gotoLine = pyqtSignal(int)
+
+    def __init__(self, parent, title=None, grouphits=None, searchexp=None, saved=None, auto=False):
+        # XXX convert searchexp to searchterm and findflags later
+        super().__init__(parent, title, 0, saved, auto)
+        # higlights are expensive for this, so disable it
+        self.ui.showButton.hide()
+        self.ui.hideButton.hide()
+
+        self.searchexp = searchexp  # XXX use these later
+        self.model = groupList(grouphits)
+        self.modelInit()
+        tv = self.ui.tableView
+        tv.setModel(self.model)
+        tv.resizeColumnsToContents()  # XXX refactor to base?
+        tv.clicked.connect(self.gotoIndex)
+        self.hideCols() # now that model is set
+        # XX highlight color picker setup
+
+    def gotoIndex(self, index):
+        item = self.model.getItem(index)
+        if item:
+            self.gotoLine.emit(item.line)
+
+    def findSelection(self, cursor, exact=True):
+        # extract block number from cursor, search for that in the data
+        line = cursor.blockNumber()
+        index = self.model.findLine(line, exact)
+        if not index:
+            return
+        # if not exact and line doesn't match, pick the previous line XXXX BUG
+        self.ui.tableView.setCurrentIndex(index)
+        self.ui.tableView.scrollTo(index.siblingAtColumn(self.favcol))
+
+    def findLastSelectionBefore(self, cursor):
+        self.findSelection(cursor,exact=False)
+
+
+class groupItem():
+    # data comes in as ((line, instance), (whole match, groups...))
+    def __init__(self, item):
+        if not item:
+            return None  # XXXX check this error some other way
+        try:
+            self.text = item[1][0]
+        except Exception as e:
+            print(e)  # EXCEPT
+        (self.line, self.offcount, self.cursor) = item[0]
+        self.groups = item[1]
+        # don't bother with context, if the user wants that they should put a group for it in the regex
+
+
+class groupList(itemListModel):
+    def __init__(self, hits=None):
+        # note: can't set headers properly until first data item
+        self._cols = 1
+        self.itemType = groupItem
+        if not hits:
+            super().__init__(['0'])
+        else:
+            #self.cols = len(hits[0][1])
+            super().__init__(['junk'])
+            for item in hits:
+                self.addMatch(item) # XX not the most efficent way ...
+        # XX color?
+
+    # oops this should have overriden appendItem, refactor later
+    def addMatch(self, itemdata):
+        self.appendItem(itemdata)
+
+    def appendItem(self, itemdata):
+        # XX check if it's alreayd a groupItem ?
+        item = groupItem(itemdata)
+        super().appendItem(item)
+        if self._cols<2 and len(item.groups)>1:
+            # first inserted row?
+            self.beginResetModel()
+            self._cols = len(item.groups) # XX cols changed signal instead of full reset?
+            self.endResetModel()
+
+    def headerData(self, col, orientation, role):
+        if self.isEmpty(): return None
+        if role == Qt.ItemDataRole.DisplayRole:
+            # horizontal numeric headers
+            if orientation == Qt.Orientation.Horizontal and col<self._cols:
+                return str(col)
+            elif orientation == Qt.Orientation.Vertical and col<len(self._data):
+                # pull line number from item XX and offcount?
+                return str(self._data[col].line+1)
+            else:
+                return super().headerData(col, orientation, role)
+        return None
+
+    def columnCount(self, parent):
+        return self._cols
+
+    def data(self, index, role):
+        # validate
+        if role != Qt.ItemDataRole.DisplayRole: return None
+        item = self.getItem(index)
+        if not item: return None
+        col = index.column()
+        if col> len(item.groups): return None
+        # all group columns should be strings already
+        return item.groups[col]
+
+    def findLine(self, line, exact=False):
+        i = bisect_left(self._data, line, key=lambda d: d.line)
+        if not 0 <= i <= len(self._data):
+            return None # XXX
+        if i>=len(self._data) or self._data[i].line != line:
+            if exact:
+                return None
+            elif i>0:
+                i -=1  # bisect_left returns the next value not prev
+        return self.index(i,0)
+
+    def lastFound(self):
+        if not self._data: return None
+        return self._data[-1].cursor

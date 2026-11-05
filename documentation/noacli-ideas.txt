@@ -1,0 +1,388 @@
+noacli -- no ampersand asynchronous shell
+
+
+This is part todo list and part brainstorming repository.
+
+Column key:
+o  partial implementation1
+*  done
+!  next
+E  buggy
+x  not supported in Qt (or I haven't figured it out) (might still be possible)
+n  decided to not implement this
+D  documented feature (in Readme.md)
+d  documented internally (doc settings doc)
+V  documented in a video
+v  documented in a future video
+t  documented internally with tool tip
+
+  Bugs
+    qtail --title messes up setting window title
+    fix all dialogs to not reopen, but instead reraise the old window
+    "resetting timer" print message when autorefresh is not enabled
+D   new group search is undocumented
+    find previous highlights feature is not documented
+ *  autoersize width on new dock works and then reverts!?
+ *  job window state column gets silly wide with crashed process state
+ *     should use tooltip and max width
+ *     should make less verbose
+D*  Group search dock not fully implemented:
+      highlights?
+ *    resize columns on doubleclick
+D*    hide/show columns
+ *  save/restore geometry needs to save dock geom and visibility too probably
+
+ -Things to implement soon:
+   cli initial size hint for qtail window (doesn't work on wayland scaled)
+ ! add ability to refresh searches when the document is refreshed
+ ! add live tracking between search docks and the document scrolling
+ ! track highlight: update searchdocs to highlight before cursor (context)
+ ? Implement settings modules
+     menu to scan dir and show potential modules to import
+     include both app and user module dirs
+     predefined wrappers
+     predefined favorites and buttons
+     predefined searches
+     predefined context menu searches
+Dx tail --format=html needs to read the whole text at once
+D*   too messy to fix, implemented work around (convert after reading as plain)
+ E  qtail -auto cli option doesn't initial trigger
+ * jobs: click on status column to hide/show lost windows in addtion to raise
+ ? change where templates get data
+D*   regex groups? (via saved searches)
+ *   try selected text first
+ *   then whole edit buffer
+     then clipboard
+     setting to turn each of these on or off (and set order?)
+ ? redo font mapping
+ ! fonts for every noacli UI
+     main window
+     button window
+     edit window
+     log windows
+     small window
+     numbered fonts in tail window
+     table window??
+ ? tail cli: --notoolbars --follow
+ * searchdock: detect previous searchdoc(s) and shrink it
+ !  add QProgressBar to QStatusBar with addWidget or addPermanentWidget
+ *  pie graph QtCharts/QPieSeries or progress bar dock widget
+      tail option -> context option, view option
+ *    percentage regex
+ *    show on main window
+ *    concentric? / colors
+      pick panel
+D* qtail size hint / delay  cli option
+ ! qtail: xlate \r \n
+ ! qtail: translate ansi sequences
+ ? tableviewer: recognize psql ascii table format
+ ? qtail context menu: if selection, find more...
+D* qtail context actions from regex or use ~~QTextBrowser.anchorClicked~~
+D* context regex commands (below)
+ ? toc build using QTextFormat.HeadingLevel paragraph property
+ ! rebuild visible searches on reload and follow tail
+ ? file buffering large text like less
+ * QTextOption.WordWrap --> WrapAtWordBoundaryOrAnywhere
+D! qtail findallgroup: iterate blocks, column align (LCRH)
+ ? jump to line feature (with cli and gui support)
+ ? https://pypi.org/project/pyqt-line-number-widget/ (how badly is ths wanted?)
+ ! tableviewer search box in pull down
+ ? tableviewer search pulldown: sort/search checkbox?
+ ! bug in button dock: "set default dock" buttons are saved in wrong dock
+ ? button dock: editing a button moves it
+   right click favorite (button or editor) for fav edit dialog
+ ? right click favorite to add smart title
+ ! edit favorite dialog
+     merging all preferences into one dialog
+     separate title
+     button dock selector
+     large text box
+     trigger from favorites editor and right click on button "edit this button"
+ ! fav editor: grey out button if no changes? save vs ok?
+ ? findall autoresize (on restack, context menu?)
+ ! bug: settings dialogs are not reentrant
+ ! tableviewer -> rerun / kill? / stats
+ ! Bug: bus/*.txt table crash (2 bugs)
+ ? detect headings (in search/toc) for markdown
+ ? Add hiddenJobs as its own dock
+ ? qtail findall: mark scrollbar with finds (custom painter)
+   QKeySequence.StandardKey implementations: HelpContents Preferences About (Close) Refresh (Find?)
+
+ x folding TOC view
+     tree view (try again in qt6?)
+     findall -> assign level and merge
+   editing button name should update (or insert) comment in command
+ - BUG: job manager: add force remove job (how does this happen?)
+ - tableviewer: cli option to set show/hide columns initially
+ ! search all incremental update
+ ! search all rerun button
+D* canned findall sets (toc searches)
+D*   set name
+     hot key
+ !   regex + color
+ x   multiple
+ x     fold level
+D*   trigger set from pull down
+     trigger set from regex on command
+D*     command regex
+D*     enable
+ x hyperlink regex on command regex match
+ x   assoc array of command regex
+ x   array of body regex + hyperlink action
+ x   hyperlink action: command with regex subst
+ * autoresize findall window height if a second window is opened underneath?
+ ? add completion/status/window open  icons to jobs menu pulldown
+   tableviewer: numberize selected/all cells that match ^\s*[+-]?\d+\s*$ (for sorting, formatting)
+     same for floats?
+ * qtable -> view menu: add sort/select checkbox from column picker
+ * add setting and timer to sync settings and history (bug fix)
+   QTextBrowser.searchPaths() to help find internal docs
+ * Bug: reload doesn't work on --file
+   Bug: --format=md doesn't work on pipes? need to read all
+ *   work around for format=md,html: convert from context menu after loading
+ ! preliminary ansi support
+      should be easy to directly implement in Qt text changes directly
+      set ansi flag or input hook
+      translate known ansi codes
+      log untranslated ansi codes and request bug filing
+      regex "\033[(\d*)m"
+      30-36:
+       0: reset to default format
+       1:  bold
+       31: red
+       32: green
+       36: teal (cyan?)
+   disable word wrap on line threshold?
+ * on -w disable: word wrap, adjust size (prevent wordwrap hangs)
+ ! test word wrap performance in Qt6
+   qtail search dock: update search results if file grows (manual update?)
+D* qtail search dock: save regex groups as extra columns?
+D* qtail search dock: use regex groups? instead of context?
+   general settings editor needs a search
+   history could resize vertically on popout?
+   window title: do a better job of eliding long commands
+   table column picker needs an undo select columns
+   cd should parse ~
+   realign general settings editor to be callable from other apps
+   tableview: use (context,picked) column for vertical headers
+   tableview: replace column headers with selected row
+   fix command parser to use built environment setting (XXXX marked)
+ o tableview sort
+      convert numbers before sorting?
+
+ -Maybe implement these
+ ! qtail: enable dock nesting and other properties?
+   button dock: handle favorite rename?
+
+ -high priority bugs
+ * watched|autorefresh file dialog shouldn't close if it is empty
+ ! jobs sometimes won't go away after exiting
+ ! --filter= doesn't support regex
+   mac bugs
+     history arrows don't work on mac
+ *   icons and app name don't work on mac
+ ? fileDialog doesn't always trim prefix correctly
+     doesn't work consistently if no prefix directory (./ doesn't work either)
+ o   leaves junk before filename if prefix doesn't match
+ x   partial directory names can't be matched
+   document environment editor a bit
+      mode?
+ *    "add" button in dialog
+ ! QPersistentModelIndex contamination, trace and check types (marked)
+     also in noajobs.py
+   tableview doesn't merge headings when whole columns are merged
+   tableview: allow editing column headers?
+
+ -Misc things to implement
+ ! qtail: translate terminal colors (for git diff)
+   sync should load missing geom settings
+   shortcuts for internal actions
+ o history context menu: set vert spacing: expand vs minimum
+     context menu -> reset to default height
+ o history view row height
+ !   use minimum row height (context/default)
+     use default row height? (current default)
+     autosize rows (only?) if they would be smaller
+     reset to default on corner button?
+   menu item (implemented, but not in menu)
+ *   close all windows
+ *   kill all subprocesses
+ * if output windows are not visible, add extra status to main window?
+
+ -User visible bugs:
+   some dialogs may not be reentrant -- make them singletons?
+   qtable: sometimes splits lines (buffer doesn't join?)
+   command buttons can be broken by setwrap (more testing needed)
+   duplicate key bindings don't get background paint until dialog is reopened
+ * favorites editor bugs
+DE    should warn on duplicate names? (color?)
+
+ -Fixed bugs and finished features (delete these next version or document):
+
+ -Bugs:
+ ! refactor flowlayout to separate Qt code and noacli code (inherit)
+   simpleargs processing in noajobs.py
+ !   called in multiple places (refactor?)
+     return value not checked for errors
+ !   errors not displayed
+   refactor tableviewer simpleargs to merge with parseargs
+   settings dialogs use shared variables and should not be duplicate opened
+      raise and focus old dialog instead
+   button dock editor dialog is not sized properly or resized on demand
+   tableviewer sort doesn't recognize numbers as numbers
+   inconsistent coding style as I was learning Qt as I wrote this and discovered some Qt features after having reimplemented them
+ ! new env marked as 'inherit' but not in parent should be deleted on save
+   (marked) OutWin commands with no external command do nothing (usage msg?)
+ ! Trigger full usage msg for table/tail somehow
+   test sibling markers
+ o QFont styled item delegate
+     displayed font name is ugly
+     fonts are handed as objects to QSettings, save as font name later?
+ * 'type' builtin fails on old python (fix untested)
+ ? what to do with stderr? always log?
+ x    maybe write a QProcess wrapperclass that makes stderr look like a QIODevice
+      send tableviewer stderr to log and/or smalloutput?
+   lots of stuff packed into class noacli that could go elsewhere
+ ? make file dialog not modal
+     file dialog could temp insert icon in buffer where it will drop names
+     insert icon=self.style().standardIcon(QStyle.SP_FileDialogStart)
+   Poor data flow between jobItem and smallOutput (refactor)
+
+ - Main features not fully implemented
+
+D* button editor ("favorites")
+     right click context menu
+ ?      edit in larger window (or just stretch the cell)
+        ui.tableView.resizerowsToContents
+     add Settings save menu item somewhere
+
+ n status icon? from logged job?
+   text window (terminal?) with regex progress icon / meter
+
+ o bookmarks and highlights (fancy find all)
+     set context size (words? chars?)
+ *   collect docks: tabify all and move to left
+     SETTING: set dock collection location or style or default (tabify, vert stack, etc.)
+ !   Action to rerun all searches
+ *   Adjust search to update window progressively instead of freezing until done?
+ x     allow aborting long running search (button? detect window close?)
+
+   Possible internal actions for shortcut keys
+     save favorites
+     sync settings
+     switch to geometry profile ... (one key per profile?)
+     save current geometry
+     restore current geometry
+     show all / hide all /tabify all docks
+     show/hide dock X (one key per dock?)
+     run (hardcoded now)
+     run last command
+     clear command
+     history up (hardcoded now)
+     history down (hardcoded now)
+     small dup
+     small log
+     small kill
+   possible qtail and tableviewer actions for shortcut keys
+     adjust size (body, rows, columns, window)
+     refresh / reload (NOT CLOSE)
+     close
+     cancel autorefresh
+     restart autorefresh
+     toggle headings (view, type)
+     toggle column picker
+     toggle sort/select on tableviewer column headers
+     find next
+     clear find
+     clear find highlight
+     edit find (ctrl-f ?)
+
+   man page viewer
+     qtail base
+ *   fixed width font?
+ *x  regex replace cross references with links
+ *   links trigger reading other man pages
+     database
+       detect new pages since last init / newly installed pages
+       cross reference tree
+       timestamp of last time a page is read
+       pick a random not-recent page
+       pages by families?
+       side bar / dock of (recent, related) man pages
+       sort list by
+         time
+         relation depth
+         alphabetically
+         section, then alpha
+         num similar letters
+       search by
+         apropos
+         read (on,before,after) date
+         related
+         filter by section
+        clear database
+D* Context regex commands
+D*   on right click, generate a menu of context specific commands
+D*     use highlighted region as context
+D*     use current word as context
+D*     use current line as context
+D*     try each regex on context
+     sources
+ *     qt settings
+ !     user configured files (deleteable)
+ !     noacli included config files
+       metadata:
+D*       name/source
+D*	 enabled
+ !   context set
+ !     from config file
+         preconfigured
+ 	   OS specific, automatically enabled
+ !	   user selected sets (menu?)
+ !	 user imported
+       from qt settings
+     data structure
+ x     context set
+ x       source (config file, qt settings)
+ *	 name  (source,name) is unique
+ x	 description?
+D*	 enabled checkbox
+D*	 regex to match command to enable set (may be empty for global)
+ -	 list of rules
+ -     rule list
+D*       enabled checkbox (default on)
+D*	 document context (highlight, line, word)
+D*	 immediate checkbox
+D*	   run command immediately or
+D*	   dump command into command editor
+D*       regex match (using groups)
+D*	 display text (using group substituions), inserted into menu
+D*	 command (using group substitutions)
+ -   configuration
+D*	read sets from qt settings
+ !	rulesets from config files
+ x	  get list of enabled config files from qt settings
+ x	  auto-enable config files (if no settings lits)
+ x	    default enabled sets
+ x	    os specific sets
+ 	edit configs
+ 	  add user defined config file (directory?)
+ !	  noacli included ruleset directories
+ x	  enable/disable config files
+ 	  treeview editor?
+ 	    sources
+ 	      context set
+ 	        rule list
+D*	  global edit in settings
+ 	  context menu: edit context sets that match current context (treeview)
+ x   noacli commands
+ x     {dis,en}ableset source setname
+ x     usable from buttons
+
+----E
+## ispell put these here
+LocalWords:  settingsDialog tableview smalldup fileDialog smalloutput
+LocalWords:  splitlines Qsettings autocheck historyView jobTableVew
+LocalWords:  tableView commandEditor QtTail plainTextEdit searchTerm
+LocalWords:  QWidget reimplemented simpleargs OutWin QSettings qtail
+LocalWords:  QIODevice jobItem smallOutput noacli

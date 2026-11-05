@@ -1,0 +1,10 @@
+__pycache__/
+*~
+junk/
+noacli.tgz
+TAGS
+noaclires.py
+smalloutputres.py
+qtailres.py
+noacli_ui.py.bak
+newyear

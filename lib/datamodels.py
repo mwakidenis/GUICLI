@@ -1,0 +1,431 @@
+
+__license__   = 'GPL v3'
+__copyright__ = '2022, 2023, 2026 Steven Dick <kg4ydw@gmail.com>'
+
+# simple tables and widgets for manipulating tables
+# contaminated with app specific classes and GUI pieces
+
+from PyQt6 import QtCore
+from PyQt6.QtCore import Qt, QObject, QModelIndex, QPersistentModelIndex, QAbstractTableModel, pyqtSignal, QTimer
+from PyQt6.QtGui import QBrush
+from PyQt6 import QtWidgets
+from lib.settingsdialog_ui import Ui_settingsDialog
+from lib.wayland_fixes import resize_window, release_constraints
+
+from functools import partial
+
+class simpleTable(QAbstractTableModel):
+    def __init__(self, data, headers, datatypes=None, datatypesrow=None, editmask=None, validator=None ):
+        QAbstractTableModel.__init__(self)
+        #super().__init__(self)  # why does this break?
+        self.mydata = data
+        self.headers = headers
+        self.vheaders = None
+        self.datatypes = datatypes
+        self.datatypesrow = datatypesrow
+        self.editmask = editmask
+        self.validator = validator
+    # required functions rowCount columnCount data
+
+    def rowCount(self, parent):
+        return len(self.mydata)
+
+    def columnCount(self, parent):
+        return len(self.headers)
+
+    def dataType(self, row, col):
+        if self.datatypes and self.datatypes[row][col]:
+            return self.datatypes[row][col]
+        elif self.datatypesrow and self.datatypesrow[col]:
+            return self.datatypesrow[col]
+        return False
+
+    def data(self, index, role):
+        if not self.validateIndex(index): return None
+        row = index.row()
+        col = index.column()
+        # don't return normal data if this is suppose to be a checkbox
+        ctype = self.dataType(row, col)
+        if ctype and (ctype==bool or isinstance(self.mydata[row][col], bool)):
+            if role==Qt.ItemDataRole.CheckStateRole:
+                if self.mydata[row][col]:
+                    return Qt.CheckState.Checked
+                else:
+                    return Qt.CheckState.Unchecked
+            else:
+                return None
+        if role in [Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.UserRole, Qt.ItemDataRole.EditRole]:
+            try:  # ignore messy tables
+                return self.mydata[row][col]
+            except IndexError:
+                return None
+        return None
+
+    def setData(self, index, value, role):
+        if not self.validateIndex(index): return False
+        # flags() controls if cell is writable
+        row = index.row()
+        col = index.column()
+        # try user validator
+        if self.validator and role in [Qt.ItemDataRole.EditRole, Qt.ItemDataRole.CheckStateRole]:
+            if not self.validator(index, value): return False
+        # validate and force type
+        ctype = self.dataType(row, col)
+        if ctype:
+            try:
+                self.mydata[row][col] = ctype(value)
+                self.dataChanged.emit(index, index)
+                return True
+            except Exception as e:
+                print(str(e))   # EXCEPT
+                return False
+        self.mydata[row][col] = value  # do it without any validation or cast
+        self.dataChanged.emit(index, index)
+        return True
+
+    def flags(self, index):
+        col = index.column()
+        if not (self.datatypesrow or self.editmask) or col<0 or col>=len(self.headers):
+            return super().flags(index)
+        mask = Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled
+        ctype = self.dataType(index.row(), col)
+        if ctype==bool:
+            mask |= Qt.ItemFlag.ItemIsUserCheckable
+        elif self.editmask and self.editmask[col]:
+            mask |= Qt.ItemFlag.ItemIsEditable
+        return mask
+
+    def validateIndex(self, index):
+        if not index or not index.isValid(): return False
+        row = index.row()
+        if row<0 or row>=len(self.mydata): return False
+        col = index.column()
+        if col<0 or col>=len(self.headers): return False
+        return True
+
+    # recommended: headerData
+    def headerData(self, col, orientation, role):
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.Orientation.Horizontal and col<len(self.headers):
+                return self.headers[col]
+            elif orientation == Qt.Orientation.Vertical and col<len(self.mydata):
+                if self.vheaders and col<len(self.vheaders):
+                    return self.vheaders[col]
+                # if you don't like veritcal headers, turn them off in designer
+                return str(col+1)
+        return None
+
+    def insertRowsAt(self, where, rows):
+        # non-standard manipulator
+        # where=0 at start, where=1 at end
+        count = len(rows)
+        if where:
+            start=len(self.mydata)
+        else:
+            start=0
+        self.beginInsertRows(QModelIndex(), start, start+count-1)
+        if where:
+            self.mydata = self.mydata+rows
+        else:
+            self.mydata = rows + self.mydata
+        maxx = max(len(row) for row in rows)
+        self.endInsertRows()
+        self.checkExtendHeaders(maxx)
+
+    def appendColumn(self, head, coldata):
+        col = len(self.headers)
+        self.beginInsertColumns(QModelIndex(), col, col)
+        self.headers.append(head)
+        for i in range(len(coldata)):
+            self.mydata[i].append(coldata[i])
+        # cheat a bit, dup last item
+        if self.datatypesrow:
+            self.datatypesrow.append(self.datatypesrow[-1])
+        if self.editmask:
+            self.editmask.append(self.editmask[-1])
+        self.endInsertColumns()
+
+    def checkExtendHeaders(self, maxx):
+        if maxx> len(self.headers):
+            start = len(self.headers)
+            for i in range(start, maxx):
+                self.headers.append(str(i+1))
+            self.headerDataChanged.emit(Qt.Orientation.Horizontal, start, maxx)
+
+    def appendRow(self, row):
+        lastrow = len(self.mydata)
+        self.beginInsertRows(QModelIndex(), lastrow, lastrow)
+        self.mydata.append(row)
+        self.endInsertRows()
+        return self.index(lastrow, 0)
+
+    def mergeCells(self, index, count=1):
+        '''merge this cell with its adjacent neighbors in the same row, shifting
+           down remaining cells
+        '''
+        # note: model doesn't have a beginMangleCells, sigh.
+        row = index.row()
+        col = index.column()
+        if col+count>=len(self.mydata[row]): return False  # whoops!
+        # XX this should merge cells with the correct delimiter, oops
+        for i in range(1, count+1):
+            self.mydata[row][col] += ' '+self.mydata[row][col+i]
+        del self.mydata[row][col+1:col+count+1]
+        self.dataChanged.emit(self.index(row, col), self.index(row, len(self.mydata[row])))
+        return True
+
+
+class itemListModel(QAbstractTableModel):
+    # an array of items, where each item is a row
+    search_finished = pyqtSignal()
+    def __init__(self, headers):
+        QAbstractTableModel.__init__(self)
+        self._data = [ ]
+        self.headers = headers
+        self.iterval = None
+        self.backgroundTimer = None
+        self.finishingSearch = False
+
+    # make this iterable
+    def __getitem__(self, key):
+        # note: this returns an index rather than returning the data
+        if not isinstance(key, int): raise TypeError
+        if key<0 or key>=len(self._data): raise IndexError
+        return self.index(key, 0)
+        ### this could return the entry instead
+        #return self._data[key]
+
+    def isEmpty(self):
+        return len(self._data)==0
+
+    # required functions rowCount columnCount data
+    def rowCount(self, parent):
+        return len(self._data)
+
+    def columnCount(self, parent):
+        return len(self.headers)
+
+    # convenience function
+    def validateIndex(self, index):
+        if not index or not index.isValid(): return False
+        row = index.row()
+        if row<0 or row>=len(self._data): return False
+        # up to subclass to validate column
+        return True
+
+    # recommended: headerData
+    def headerData(self, col, orientation, role):
+        if role == Qt.ItemDataRole.DisplayRole:
+            if orientation == Qt.Orientation.Horizontal and col<len(self.headers):
+                return self.headers[col]
+            elif orientation == Qt.Orientation.Vertical and col<len(self._data):
+                # if you don't like veritcal headers, turn them off in designer
+                return str(col+1)
+        return None
+
+    def getItem(self, index):
+        if not self.validateIndex(index): return None
+        return self._data[index.row()]
+
+    def setItem(self, index, item):
+        if not self.validateIndex(index): return False
+        row = index.row()
+        self._data[row] = item
+        self.dataChanged.emit(self.index(row, 0), self.index(row, self.columnCount(None)-1))
+        return True
+
+    # most added items are added at the end...
+    def appendItem(self, item):
+        lastrow = len(self._data)
+        self.beginInsertRows(QModelIndex(), lastrow, lastrow)
+        self._data.append(item)
+        self.endInsertRows()
+        item.index = QPersistentModelIndex(self.index(lastrow, 1))  # and item remembers itself
+        return item.index
+
+    def insertRowsAt(self, where, rows):
+        # non-standard manipulator
+        # where=0 at start, where=1 at end
+        count = len(rows)
+        if where:
+            start=len(self._data)
+        else:
+            start=0
+        self.beginInsertRows(QModelIndex(), start, start+count-1)
+        if where:
+            self._data = self._data+rows
+        else:
+            self._data = rows + self._data
+        self.endInsertRows()
+
+    # subclass needs to first verify these can be deleted
+    def removeRows(self, start, count, parent):
+        if start<0 or start+count>len(self._data): return False
+        self.beginRemoveRows(QModelIndex(), start, start+count-1)
+        for i in range(count):
+            d = self._data.pop(start)
+            # clean up?  only some datatypes
+        self.endRemoveRows()
+        return True
+
+    def clear(self):
+        self.beginResetModel()
+        self._data = []
+        self.endResetModel()
+
+    def canFetchMore(self, parent):
+        # list items don't have subelements
+        return not (parent and parent.isValid()) and bool(self.iterval)
+
+    def fetchMoreByAppend(self, parent, more=5):
+        # this code shouldn't be used but is here as a (slow) fallback
+        if parent and parent.isValid(): return
+        if not self.iterval: return
+        try:
+            for i in range(more):
+                self.appendItem(next(self.iterval))
+        except StopIteration:
+            self.iterval = None  # renitialize it somewhere else
+        if not self.iterval:
+            self.search_finished.emit()
+        if not self.iterval and self.backgroundTimer:
+            self.backgroundTimer.stop() # ran out
+
+    def fetchMore(self, parent, more=5):
+        # do it in batch instead
+        if parent and parent.isValid(): return
+        if not self.iterval: return
+        if not hasattr(self, 'itemType'): # XXX issue debug warning for slow?
+            return self.fetchMoreByAppend(parent,more)
+        batch = []
+        try:
+            for i in range(more):
+                batch.append(self.itemType(next(self.iterval)))
+        except StopIteration:
+            self.iterval = None  # renitialize it somewhere else
+        if batch:
+            self.insertRowsAt(1,batch)
+        if not self.iterval:
+            self.search_finished.emit()
+        if not self.iterval and self.backgroundTimer:
+            self.backgroundTimer.stop() # ran out, stop timer.
+
+    def finishInBackground(self):
+        if not self.iterval: return # nothing to do
+        if not self.backgroundTimer:
+            self.backgroundTimer = QTimer()
+            self.backgroundTimer.timeout.connect(partial(self.fetchMore, None,5))
+        self.backgroundTimer.start(100) # SETTING 0.1s enough?
+
+    def finishNow(self):
+        if not self.iterval: return # nothing to do
+        if self.backgroundTimer:  self.backgroundTimer.stop()
+        self.finishingSearch = True
+        while self.iterval and self.finishingSearch:
+            self.fetchMore(None,more=200)
+            QtCore.QCoreApplication.processEvents()
+
+class settingsDataModel(simpleTable):
+    def __init__(self, docdict, data, typedata=None):
+        self.docdict = docdict
+        # XX this could be 3 column with the tool tips in col 3
+        super().__init__(data, ['Setting', 'Value'], typedata, editmask=[False, True])
+        # nothing else to do, most done in gui model
+
+    def data(self, index, role):
+        if not self.validateIndex(index): return None
+        col = index.column()
+        row = index.row()
+        rowname = self.mydata[row][0]
+        # color and supply default data
+        if col==1 and self.mydata[row][1] is None:   # not set, use default
+            if role==Qt.ItemDataRole.BackgroundRole:
+                return QBrush(Qt.GlobalColor.lightGray)
+            if self.docdict[rowname][2]==bool:
+                if role==Qt.ItemDataRole.CheckStateRole:
+                    if self.docdict[rowname][0]: return Qt.CheckState.Checked
+                    else: return Qt.CheckState.Unchecked
+                elif role!=Qt.ItemDataRole.ToolTipRole:
+                    return None  # no text label on bools
+            elif role in [Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.UserRole, Qt.ItemDataRole.EditRole]:
+                # have to fill in default data to get type right
+                return self.docdict[rowname][0]
+        if role==Qt.ItemDataRole.ToolTipRole:  # XX and StatusRole ?
+            if self.mydata[row][0] not in self.docdict: return None
+            doc = self.docdict[rowname]
+            # swap tooltip columns
+            return doc[1-col]
+        return super().data(index, role)
+
+
+class settingsDialog(QtWidgets.QDialog):
+    typedelegates = {}
+    want_resize = pyqtSignal()
+
+    def __init__(self, title, model, doc=None):
+        # don't use parent, make the calling class save it so this isn't reentrant
+        super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
+        ui = Ui_settingsDialog()
+        self.model = model
+        # XX proxy model?  search?
+        self.ui = ui
+        ui.setupUi(self)
+        ui.tableView.setModel(model)
+        self.want_resize.connect(self.adjustSize, Qt.ConnectionType.QueuedConnection)
+        if hasattr(model, 'datatypesrow') and model.datatypesrow:
+            for i in range(len(model.datatypesrow)):
+                typename = str(model.datatypesrow[i])
+                if typename in self.typedelegates:
+                    ui.tableView.setItemDelegateForColumn(i, self.typedelegates[typename][1](ui.tableView))
+        # very special, only check col=1
+        if hasattr(model, 'datatypes') and model.datatypes:
+            for row in range(len(model.datatypes)):
+                typename = str(model.datatypes[row][1])
+                if typename in self.typedelegates:
+                    ui.tableView.setItemDelegateForRow(row, self.typedelegates[typename][1](ui.tableView))
+        self.setWindowTitle(title)
+        if doc:
+            ui.label.setText(doc)
+        else:
+            ui.label.setText(title)
+        ui.tableView.resizeColumnsToContents()
+        #XX not without reset function ### self.ui.tableView.horizontalHeader().sectionDoubleClicked.connect(self.ui.tableView.resizeColumnToContents)
+        self.ui.tableView.verticalHeader().sectionDoubleClicked.connect(self.ui.tableView.resizeRowToContents)
+        # replace corner
+        cb = self.ui.tableView.findChild(QtWidgets.QAbstractButton)
+        if cb:
+            cb.disconnect()
+            cb.clicked.connect(self.adjustSize)
+            cb.setToolTip("adjust size")
+        # resize top window too?
+        self.want_resize.emit()
+        self.show()
+
+    def adjustSize(self):
+        hh = self.ui.tableView.horizontalHeader()
+        vh = self.ui.tableView.verticalHeader()
+        hw = hh.length() + vh.size().width()  # not used !?
+        tw = self.ui.tableView.size().width()
+
+        lastc = hh.count()-1
+        lastw = hh.sectionSize(lastc)
+
+        newtw = (hh.length()-lastw)*2 + vh.size().width()
+
+        mw = self.size().width()
+        frame = mw - tw
+        #print("hw={} tw={} ntw={} mw={}".format(hw,tw,newtw, mw)) # DEBUG
+        if newtw>tw:  # don't shrink
+            size = QtCore.QSize(newtw+frame+30, self.size().height())
+            #print("resize {}".format(size.width())) # DEBUG
+            # XX minimum vertical hight relative to header height?
+            resize_window(self, size)
+
+    def resizeEvent(self, ev):
+        super().resizeEvent(ev)
+        release_constraints(self, ev)
+
+    @classmethod
+    def registerType(cls, typec, delegate):
+        cls.typedelegates[str(typec)] = [typec, delegate]

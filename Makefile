@@ -1,0 +1,77 @@
+
+UI= lib/qtail_ui.py lib/noacli_ui.py lib/settingsdialog_ui.py lib/tableviewer_ui.py lib/searchdock_ui.py lib/colorlisteditor_ui.py lib/saved_searches_ui.py lib/progress_ui.py
+SRCFILES=$(shell git ls-files | grep 'py$$' | grep -v '_ui.py')
+DISTFILES=$(SRCFILES) $(UI) $(RESOURCES)
+
+all: $(UI)
+
+# fix bugs in pyuic6
+%.py: %.ui
+	pyuic6 -o $@ $<
+	sed -i 's/QMainWindow\.\(Allow\|Animated\|Grouped\|AllowNestedDocks\)/QMainWindow.DockOption.\1/g' $@
+
+ubuntu-setup:
+	sudo apt-get install python3-pyqt6
+
+ubuntu-user-install:
+	sed -Ee "/Icon|Exec/s,=,=$$PWD/," noacli.desktop > ${HOME}/.local/share/applications/noacli.desktop
+#cp noacli.png qtail.png .local/share/icons/
+# .local/share/icons/hicolor/128x128/noacli.png
+
+macos-setup:
+	python3 -m pip install pyqt6 pillow pyinstaller
+#python3 -m pipx install pyinstaller ## doesn't work, needs env
+
+macos:
+	rm -rf dist
+	pyinstaller --windowed --name=noacli --i icons/noacli.png noacli.py
+
+noacli.tgz: $(DISTFILES)
+	rm -f noacli.tgz
+	tar czvf noacli.tgz $(DISTFILES)
+
+clean:
+	rm *~ lib/*~ TAGS
+clobber: clean
+	rm -f noacli.tgz
+
+tags: TAGS
+TAGS: $(SRCFILES)
+	etags --regex '/.*ETAGS: \(\w+\)/\1/' ${SRCFILES}
+
+
+# How much of brainstormed features are implemented? (this is a bit silly)
+# key is in the top of documentation/nocli-ideas.txt
+featureprogress:
+	sed -n -e '/^----/,/^----/{ /^ *$$/d; /^.-/d; p}' documentation/noacli-ideas.txt  | cut -c 2|sort|uniq -c | awk '{p[$$2]=$$1; x+=$$1} END { for (i in p) { printf "%3d %4.1f %s\n",p[i],p[i]/x*100,i}; print x}'
+
+
+# for emacs sometimes
+# marger tags:
+#  XX  possibly unfinished feature
+#  XXX unfinished feature
+#  XXXX very unfinished feature
+#  XXXXX FIX ME NOW
+#  DEBUG debug print
+#  EXCEPT print if something unexpected went wrong
+findprint:
+	-grep --color -nH -e 'print(' *.py lib/*.py |egrep -av 'DEBUG|EXCEPT'
+findxx:
+	-grep --color -nH -e XX *.py lib/*.py 
+findxxx:
+	-grep --color -nH -e XXX *.py lib/*.py 
+findxxxx:
+	-grep --color -nH -e XXXX *.py lib/*.py 
+findxxxxx:
+	-grep --color -nH -e XXXXX *.py lib/*.py 
+finddebug:
+	-grep --color -nH -e '^ *[^ #].*DEBUG' *.py lib/*.py 
+copyright:
+	-find . -name '*.py' -newer newyear | xargs grep _copyright /dev/null | grep -v `date +%Y`
+
+# ~/.pylint
+pylint:
+	pylint $(SRCFILES)
+# tox.ini
+pylint2:
+	flake8 --format=pylint $(SRCFILES)

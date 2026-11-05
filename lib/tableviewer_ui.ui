@@ -1,0 +1,630 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TableViewer</class>
+ <widget class="QMainWindow" name="TableViewer">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>745</width>
+    <height>307</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>554</width>
+         <height>241</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QTableView" name="tableView">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Check to select columns, uncheck to sort columns</string>
+          </property>
+          <property name="autoScroll">
+           <bool>true</bool>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="sortingEnabled">
+           <bool>false</bool>
+          </property>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>745</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionAutosizeRowHeights"/>
+    <addaction name="actionAdjust_size"/>
+    <addaction name="actionResize_rows"/>
+    <addaction name="actionResize_window"/>
+    <addaction name="actionSqueeze_columns"/>
+    <addaction name="separator"/>
+    <addaction name="actionResetSort"/>
+    <addaction name="actionToggle_column_sort_or_select"/>
+    <addaction name="separator"/>
+    <addaction name="actionHide_columns"/>
+    <addaction name="actionShow_headings"/>
+    <addaction name="actionUse_numerical_headings"/>
+    <addaction name="actionShow_line_numbers"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuSearch">
+    <property name="title">
+     <string>Search</string>
+    </property>
+    <addaction name="actionUseRegEx"/>
+    <addaction name="actionCaseInsensitive"/>
+    <addaction name="actionUnicode"/>
+   </widget>
+   <addaction name="menuView"/>
+   <addaction name="menuSearch"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="colPickerDock">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>Column Picker</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLineEdit" name="filterEdit">
+         <property name="toolTip">
+          <string>Select one column to filter or no column to search all.  Return sets column.</string>
+         </property>
+         <property name="placeholderText">
+          <string>filter column(s)</string>
+         </property>
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="sortOrSelect">
+         <property name="toolTip">
+          <string>Sort mode or select mode when clicking on column headers</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QToolButton" name="hideButton">
+         <property name="text">
+          <string>hide</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="showButton">
+         <property name="text">
+          <string>show</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QListView" name="colPicker">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QAbstractScrollArea::AdjustToContents</enum>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::MultiSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+       <property name="resizeMode">
+        <enum>QListView::Adjust</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="actionAdjust_size">
+   <property name="text">
+    <string>Adjust size</string>
+   </property>
+  </action>
+  <action name="actionColumn_picker">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Column picker</string>
+   </property>
+  </action>
+  <action name="actionShow_line_numbers">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show line numbers</string>
+   </property>
+  </action>
+  <action name="actionResize_rows">
+   <property name="text">
+    <string>Resize rows vertically</string>
+   </property>
+  </action>
+  <action name="actionShow_headings">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show headings</string>
+   </property>
+  </action>
+  <action name="actionResize_window">
+   <property name="text">
+    <string>Resize window</string>
+   </property>
+  </action>
+  <action name="actionSqueeze_columns">
+   <property name="text">
+    <string>Squeeze columns</string>
+   </property>
+  </action>
+  <action name="actionUse_numerical_headings">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use numerical headings</string>
+   </property>
+  </action>
+  <action name="actionResetSort">
+   <property name="text">
+    <string>Reset sort</string>
+   </property>
+  </action>
+  <action name="actionToggle_column_sort_or_select">
+   <property name="text">
+    <string>Toggle column sort or select</string>
+   </property>
+  </action>
+  <action name="actionUseRegEx">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use Regular Expressions</string>
+   </property>
+  </action>
+  <action name="actionCaseInsensitive">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Case insensitive</string>
+   </property>
+  </action>
+  <action name="actionUnicode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Unicode</string>
+   </property>
+  </action>
+  <action name="actionAutosizeRowHeights">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Autosize row heights</string>
+   </property>
+  </action>
+  <action name="actionHide_columns">
+   <property name="text">
+    <string>Hide selected columns</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>actionAdjust_size</sender>
+   <signal>triggered()</signal>
+   <receiver>TableViewer</receiver>
+   <slot>actionAdjust()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>hideButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TableViewer</receiver>
+   <slot>hideCols()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>45</x>
+     <y>90</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>102</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>showButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TableViewer</receiver>
+   <slot>showCols()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>94</x>
+     <y>91</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>132</x>
+     <y>120</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionResize_rows</sender>
+   <signal>triggered()</signal>
+   <receiver>tableView</receiver>
+   <slot>resizeRowsToContents()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>498</x>
+     <y>296</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShow_line_numbers</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>TableViewer</receiver>
+   <slot>showRowNumbers(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShow_headings</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>TableViewer</receiver>
+   <slot>showHeadings(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionResize_window</sender>
+   <signal>triggered()</signal>
+   <receiver>TableViewer</receiver>
+   <slot>resizeWindowToTable()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSqueeze_columns</sender>
+   <signal>triggered()</signal>
+   <receiver>TableViewer</receiver>
+   <slot>squeezeColumns()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionUse_numerical_headings</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>TableViewer</receiver>
+   <slot>numberHeadings(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tableView</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>TableViewer</receiver>
+   <slot>copyClip1(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>195</x>
+     <y>49</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>226</x>
+     <y>196</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tableView</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>TableViewer</receiver>
+   <slot>copyClip2(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>163</x>
+     <y>157</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>224</x>
+     <y>235</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionResetSort</sender>
+   <signal>triggered()</signal>
+   <receiver>TableViewer</receiver>
+   <slot>resetTableSort()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>filterEdit</sender>
+   <signal>textEdited(QString)</signal>
+   <receiver>TableViewer</receiver>
+   <slot>setFilterText(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>69</x>
+     <y>50</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>128</x>
+     <y>73</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>filterEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>TableViewer</receiver>
+   <slot>setFilterColumn()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>80</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>138</x>
+     <y>42</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sortOrSelect</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>TableViewer</receiver>
+   <slot>sortOrSelect(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>113</x>
+     <y>53</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>144</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionToggle_column_sort_or_select</sender>
+   <signal>triggered()</signal>
+   <receiver>sortOrSelect</receiver>
+   <slot>toggle()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>113</x>
+     <y>55</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAutosizeRowHeights</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>TableViewer</receiver>
+   <slot>setRowAutosize(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionHide_columns</sender>
+   <signal>triggered()</signal>
+   <receiver>TableViewer</receiver>
+   <slot>hideCols()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>actionAdjust()</slot>
+  <slot>hideCols()</slot>
+  <slot>showCols()</slot>
+  <slot>showRowNumbers(bool)</slot>
+  <slot>showHeadings(bool)</slot>
+  <slot>resizeWindowToTable()</slot>
+  <slot>squeezeColumns()</slot>
+  <slot>numberHeadings(bool)</slot>
+  <slot>copyClip1(QModelIndex)</slot>
+  <slot>copyClip2(QModelIndex)</slot>
+  <slot>resetTableSort()</slot>
+  <slot>setFilterText(QString)</slot>
+  <slot>setFilterColumn()</slot>
+  <slot>sortOrSelect(bool)</slot>
+  <slot>setRowAutosize(bool)</slot>
+ </slots>
+</ui>

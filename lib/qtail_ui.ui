@@ -1,0 +1,716 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>QtTail</class>
+ <widget class="QMainWindow" name="QtTail">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>719</width>
+    <height>507</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>qtail</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QFrame" name="toolBar_2">
+      <property name="lineWidth">
+       <number>0</number>
+      </property>
+      <layout class="QHBoxLayout" name="toolBar" stretch="0,0,0,0">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QCheckBox" name="followCheck">
+         <property name="text">
+          <string>Follow</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="reloadButton">
+         <property name="text">
+          <string>Reload</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Search:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="searchTerm">
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="myBrowser" name="textBrowser">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>1</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>100</width>
+        <height>50</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustToContents</enum>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>719</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionShowToolbar"/>
+    <addaction name="separator"/>
+    <addaction name="actionAdjust"/>
+    <addaction name="actionCount_lines"/>
+    <addaction name="actionWrap_lines"/>
+    <addaction name="separator"/>
+    <addaction name="separator"/>
+    <addaction name="actionFont"/>
+   </widget>
+   <widget class="QMenu" name="menuMode">
+    <property name="title">
+     <string>Watch</string>
+    </property>
+    <addaction name="actionWatch"/>
+    <addaction name="actionAutorefresh"/>
+    <addaction name="actionReload"/>
+   </widget>
+   <widget class="QMenu" name="menuSearch">
+    <property name="title">
+     <string>Search</string>
+    </property>
+    <addaction name="actionUseRegEx"/>
+    <addaction name="actionCaseInsensitive"/>
+    <addaction name="actionUnicode"/>
+    <addaction name="actionWholeWords"/>
+    <addaction name="separator"/>
+    <addaction name="actionClearFinds"/>
+    <addaction name="actionListHighlights"/>
+    <addaction name="separator"/>
+    <addaction name="actionFind_all"/>
+    <addaction name="actionFind_all_groups"/>
+    <addaction name="separator"/>
+    <addaction name="actionShowClosedSearches"/>
+    <addaction name="actionDockFloatingSearches"/>
+    <addaction name="actionDeleteClosedSearches"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaved_searches"/>
+   </widget>
+   <addaction name="menuView"/>
+   <addaction name="menuMode"/>
+   <addaction name="menuSearch"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionAdjust">
+   <property name="text">
+    <string>Adjust size</string>
+   </property>
+   <property name="toolTip">
+    <string>Adjust size</string>
+   </property>
+  </action>
+  <action name="actionCount_lines">
+   <property name="text">
+    <string>Count lines</string>
+   </property>
+  </action>
+  <action name="actionWrap_lines">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Wrap lines</string>
+   </property>
+  </action>
+  <action name="actionFont">
+   <property name="text">
+    <string>Pick font</string>
+   </property>
+  </action>
+  <action name="actionWatch">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Watch</string>
+   </property>
+  </action>
+  <action name="actionAutorefresh">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Autorefresh</string>
+   </property>
+  </action>
+  <action name="actionFontMono">
+   <property name="text">
+    <string>Pick monospace font</string>
+   </property>
+  </action>
+  <action name="actionFontMono_2">
+   <property name="text">
+    <string>Pick monospaced font</string>
+   </property>
+  </action>
+  <action name="actionClear_selections">
+   <property name="text">
+    <string>Clear finds</string>
+   </property>
+  </action>
+  <action name="actionClearFinds">
+   <property name="text">
+    <string>Clear highlights</string>
+   </property>
+  </action>
+  <action name="actionShowToolbar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show toolbar</string>
+   </property>
+  </action>
+  <action name="actionReload">
+   <property name="text">
+    <string>Refresh now</string>
+   </property>
+  </action>
+  <action name="actionUseRegEx">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use RegEx</string>
+   </property>
+  </action>
+  <action name="actionCaseInsensitive">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Case insensitive</string>
+   </property>
+  </action>
+  <action name="actionUnicode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Unicode</string>
+   </property>
+  </action>
+  <action name="actionWholeWords">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Whole words</string>
+   </property>
+  </action>
+  <action name="actionSaveExtra">
+   <property name="text">
+    <string>SaveExtra</string>
+   </property>
+  </action>
+  <action name="actionSetExtra">
+   <property name="text">
+    <string>List current highlights</string>
+   </property>
+  </action>
+  <action name="actionListHighlights">
+   <property name="text">
+    <string>List current highlights</string>
+   </property>
+  </action>
+  <action name="actionFind_all">
+   <property name="text">
+    <string>Find all</string>
+   </property>
+  </action>
+  <action name="actionDeleteClosedSearches">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Delete closed searches</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionShowClosedSearches">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show and tabify all searches</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionFind_all_groups">
+   <property name="text">
+    <string>Find all groups</string>
+   </property>
+  </action>
+  <action name="actionSaved_searches">
+   <property name="text">
+    <string>Edit saved searches</string>
+   </property>
+  </action>
+  <action name="actionDockFloatingSearches">
+   <property name="text">
+    <string>Dock floating searches</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>myBrowser</class>
+   <extends>QTextBrowser</extends>
+   <header>lib/qtailbrowser</header>
+   <slots>
+    <signal>saveHighlight()</signal>
+    <signal>clearHighlights()</signal>
+    <slot>jumpToEndMaybe(bool)</slot>
+    <slot>pickFont()</slot>
+    <slot>pickFontMono()</slot>
+   </slots>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>actionAdjust</sender>
+   <signal>triggered()</signal>
+   <receiver>QtTail</receiver>
+   <slot>actionAdjust()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCount_lines</sender>
+   <signal>triggered()</signal>
+   <receiver>QtTail</receiver>
+   <slot>showsize()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionWrap_lines</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>QtTail</receiver>
+   <slot>wrapChanged(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFont</sender>
+   <signal>triggered()</signal>
+   <receiver>textBrowser</receiver>
+   <slot>pickFont()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>265</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAutorefresh</sender>
+   <signal>triggered()</signal>
+   <receiver>QtTail</receiver>
+   <slot>actionAutoRefresh()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionWatch</sender>
+   <signal>triggered()</signal>
+   <receiver>QtTail</receiver>
+   <slot>setButtonMode()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionClearFinds</sender>
+   <signal>triggered()</signal>
+   <receiver>QtTail</receiver>
+   <slot>clearFinds()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShowToolbar</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>statusbar</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>495</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>searchTerm</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>QtTail</receiver>
+   <slot>simpleFindNew(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>464</x>
+     <y>57</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>231</x>
+     <y>22</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>searchTerm</sender>
+   <signal>returnPressed()</signal>
+   <receiver>QtTail</receiver>
+   <slot>simpleFind2()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>622</x>
+     <y>57</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>397</x>
+     <y>17</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>followCheck</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>textBrowser</receiver>
+   <slot>jumpToEndMaybe(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>36</x>
+     <y>35</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>52</x>
+     <y>121</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionReload</sender>
+   <signal>triggered()</signal>
+   <receiver>QtTail</receiver>
+   <slot>reloadOrRerun()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionListHighlights</sender>
+   <signal>triggered()</signal>
+   <receiver>QtTail</receiver>
+   <slot>extraSelectionsToDock()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFind_all</sender>
+   <signal>triggered()</signal>
+   <receiver>QtTail</receiver>
+   <slot>findAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>textBrowser</sender>
+   <signal>saveHighlight()</signal>
+   <receiver>QtTail</receiver>
+   <slot>saveHighlight()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>78</x>
+     <y>147</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>3</x>
+     <y>127</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>textBrowser</sender>
+   <signal>clearHighlights()</signal>
+   <receiver>QtTail</receiver>
+   <slot>clearFinds()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>51</x>
+     <y>189</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>189</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShowToolbar</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>toolBar_2</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>35</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDeleteClosedSearches</sender>
+   <signal>triggered()</signal>
+   <receiver>QtTail</receiver>
+   <slot>deleteClosedSearches()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShowClosedSearches</sender>
+   <signal>triggered()</signal>
+   <receiver>QtTail</receiver>
+   <slot>showClosedSearches()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFind_all_groups</sender>
+   <signal>triggered()</signal>
+   <receiver>QtTail</receiver>
+   <slot>findAllGroup()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSaved_searches</sender>
+   <signal>triggered()</signal>
+   <receiver>QtTail</receiver>
+   <slot>savedSearchesDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDockFloatingSearches</sender>
+   <signal>triggered()</signal>
+   <receiver>QtTail</receiver>
+   <slot>dockAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>53</x>
+     <y>44</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>359</x>
+     <y>253</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>simpleFind(QString)</slot>
+  <slot>readtext()</slot>
+  <slot>reload()</slot>
+  <slot>wrapChanged(int)</slot>
+  <slot>simpleFind2()</slot>
+  <slot>actionAdjust()</slot>
+  <slot>simpleFindNew(QString)</slot>
+  <slot>showsize()</slot>
+  <slot>wrapChanged(bool)</slot>
+  <slot>setButtonMode()</slot>
+  <slot>actionAutoRefresh()</slot>
+  <slot>clearFinds()</slot>
+  <slot>reloadOrRerun()</slot>
+  <slot>extraSelectionsToDock()</slot>
+  <slot>findAll()</slot>
+  <slot>saveHighlight()</slot>
+  <slot>deleteClosedSearches()</slot>
+  <slot>showClosedSearches()</slot>
+  <slot>findAllGroup()</slot>
+  <slot>savedSearchesDialog()</slot>
+  <slot>dockAll()</slot>
+ </slots>
+</ui>
