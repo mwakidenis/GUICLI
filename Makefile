@@ -24,16 +24,16 @@ macos-setup:
 
 macos:
 	rm -rf dist
-	pyinstaller --windowed --name=noacli --i icons/noacli.png noacli.py
+	pyinstaller --windowed --name=GUICLI --i icons/noacli.png noacli.py
 
-noacli.tgz: $(DISTFILES)
-	rm -f noacli.tgz
-	tar czvf noacli.tgz $(DISTFILES)
+guicli.tgz: $(DISTFILES)
+	rm -f guicli.tgz
+	tar czvf guicli.tgz $(DISTFILES)
 
 clean:
 	rm *~ lib/*~ TAGS
 clobber: clean
-	rm -f noacli.tgz
+	rm -f guicli.tgz
 
 tags: TAGS
 TAGS: $(SRCFILES)

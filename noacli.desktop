@@ -6,5 +6,5 @@ Type=Application
 Terminal=false
 Icon=icons/noacli.png
 Exec=noacli.py
-Name=noacli
-StartupWMClass=org.kg4ydw.noacli
+Name=GUICLI
+StartupWMClass=org.mwakidenis.guicli
