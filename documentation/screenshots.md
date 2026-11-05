@@ -1,4 +1,4 @@
-Here's a collection of screenshots of noacli...
+Here's a collection of screenshots of GUICLI...
 
 Sorry for this cramped busy image, but I wanted to get as many of the main
 features in one shot as possible.
@@ -14,7 +14,7 @@ Features to note:
 * There are two custom button docks.
 * The log output window has one line of new output that hasn't been seen yet.
 
-The main noacli window is reconfigurable, and the configurations can be
+The main GUICLI window is reconfigurable, and the configurations can be
 named and saved:
 
 ![small](small-buttons.png)

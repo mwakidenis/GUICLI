@@ -1,10 +1,10 @@
 
-noacli v1 used Qt5.
+GUICLI v1 used Qt5.
 
 In 2026, some platforms have limited or poor support for Qt5, and Qt5
 has issues with wayland.
 
-The point of noacli v2 is to switch to Qt6.
+The point of GUICLI v2 is to switch to Qt6.
 As of the 2.0 version, this has been done, but it has caused bugs which are
 being worked on.   In 2.1, new features will be added that take advantage
 of Qt6 new features.
@@ -28,7 +28,7 @@ Qt bug workaround, fixed in Qt 6.11+
 
 Qt6 has new features that need to be explored and maybe old bugs fixed.
 * Qt6 has features needed to function correctly in wayland
-  some noacli 1.x features are broken because qt5 doesn't support wayland
+  some GUICLI 1.x features are broken because qt5 doesn't support wayland
 * Qt6 has better regex group support? qtail can use this
   * show groups instead of prefix, regex, postfix ? (toggle between views?)
 

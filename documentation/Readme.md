@@ -1,9 +1,9 @@
-![noacli](../icons/noacli.png "icon")
-noacli: the No Ampersand CLI shell
+![GUICLI](../icons/noacli.png "icon")
+GUICLI: a smarter command-line experience
 
 This shell does most things regular CLI shells do (except full parsing
 and Turing complete programming), but in a graphical interface.
-Noacli takes full advantage of having a GUI as much as possible,
+GUICLI takes full advantage of having a GUI as much as possible,
 including common trivial data visualization stuff.
 
 This readme is not comprehensive, but it hits the major points.
@@ -56,7 +56,7 @@ None of these really make sense when you can just open another graphical window.
 
 For example, instead of a command dumping a huge blob of text into a
 terminal that scrolls away quickly and is lost, or piping that into a
-pager, noacli will automatically put that text into a graphical window
+pager, GUICLI will automatically put that text into a graphical window
 that is sized to fit, has a scroll bar, and allows searching.  As the
 program generates more output, the window will continue to collect it
 and follow the end, similar to what tail -f does.
@@ -133,7 +133,7 @@ Qtail supports the following options:
     After all the options will be a space separated list of filenames, each of which will be opened in its own qtail window
     
 '--font'
-    Choose the primary or secondary font (1 or 2) instead of the default font (only works from inside noacli), or specify a font by name, e.g., --font=mono
+    Choose the primary or secondary font (1 or 2) instead of the default font (only works from inside GUICLI), or specify a font by name, e.g., --font=mono
 
 `--nowrap`  
     Turn word wrap off initially (may be faster)
@@ -161,7 +161,7 @@ Qtail supports the following options:
     Treat filename as a URL, autodetect format.  Note: doesn't work with remote URLs
 
 `--autorefresh`  or `--autorefresh=seconds`  (or `--auto`)
-    Enable autorefresh (default = 30 seconds); only works on files outside noacli; in noacli,  commands will rerun like "watch"
+    Enable autorefresh (default = 30 seconds); only works on files outside GUICLI; in GUICLI,  commands will rerun like "watch"
 
 `--delay=seconds` (default=3)
     Delay between first chunk of read data and automatic resize attempt
@@ -208,7 +208,7 @@ Saved searches are used in the following ways:
 * Saved searches in the QTail Search menu
 * Copy saved searches in the search input line
 
-The saved search editor can be accessed from either the main noacli
+The saved search editor can be accessed from either the main GUICLI
 window or from any qtail window.  Accessing from a qtail window is
 preferred as it allows pulling sample matches for testing.
 
@@ -247,7 +247,7 @@ entry will be listed. Context searches can apply both to matched and
 unmatched commands.  Context searches always use group searches, and
 the groups are applied to the command template.  If run immediate is
 checked, the command will be run when the item is selected, otherwise
-it will be dropped into the noacli editor window for editing and
+it will be dropped into the GUICLI editor window for editing and
 further actions.
 
 When editing a search, the `Test` button will apply the search and
@@ -320,7 +320,7 @@ These are especially useful in favorites.
     Don't show (or show) the column picker at start (default: show if more than 10 columns)
 
 
-Like qtail, table also accepts the --file and --files options when used inside noacli.
+Like qtail, table also accepts the --file and --files options when used inside GUICLI.
 
 By default the search box in the column picker searches the entire
 table, but if you select a single column name from the list and press
@@ -578,16 +578,16 @@ these before running ssh, possibly locally.
 
 (Numbers in () in the following paragraph are a count of bash built in commands.)
 
-Noacli does not have many built in commands, as such commands are
-usually needed to support scripting (0/19) which noacli doesn't
+GUICLI does not have many built in commands, as such commands are
+usually needed to support scripting (0/19) which GUICLI doesn't
 support.  Other commands are used to adjust shell settings
 (4/9). manipulate jobs (3/8) and history (2/2), and environment
-settings (6/13), which noacli does mostly with a graphical interface.
+settings (6/13), which GUICLI does mostly with a graphical interface.
 
 Having said that, there are a few things that need commands or work best
 when embedded in the command line even if there is a graphical way to do it.
 
-The following are the built in commands noacli has (so far).
+The following are the built in commands GUICLI has (so far).
 These commands must be run by themselves, not combined with other commands.
 
 
@@ -635,10 +635,10 @@ commands and can be placed after the above output direction commands.
 
 # = Buffering
 
-Internally, noacli handles data in lines (which Qt calls paragraphs).
+Internally, GUICLI handles data in lines (which Qt calls paragraphs).
 Otherwise, very little is done to control buffering, and this is
 nearly completely in control of the subprocess and wrapping shell.
-This is slightly complicated by noacli not using ptys (yet) to run
+This is slightly complicated by GUICLI not using ptys (yet) to run
 commands, but standard unix commands like `stdbuf` can control
 buffering normally.
 
@@ -669,7 +669,7 @@ switch quickly to previously saved window configurations.
 Suggested window configurations are "teeny minimal", "everything",
 "output and buttons", and "default", but use your imagination to suit
 your needs. If you have a default window profile, it will be loaded at
-noacli start and saved at exit (unless you uncheck the DefWinProfile
+GUICLI start and saved at exit (unless you uncheck the DefWinProfile
 setting).
 
 # = Key bindings
@@ -723,9 +723,9 @@ history so it isn't lost.)
 
 Many items have a context menu (right click) with additional actions.
 
-If you close the main window, noacli will offer to also close other
+If you close the main window, GUICLI will offer to also close other
 windows opened in the session and kill any processes that were
-started.  You can choose to ignore these left overs, but then noacli
+started.  You can choose to ignore these left overs, but then GUICLI
 can't exit until all of them exit on their own and will hang around
 (without its own window) until then.  (This is a Qt limitation.)
 
@@ -735,7 +735,7 @@ You can force the default window title or name of a command by putting the title
 
 ## == Using ssh as a wrapper
 
-To use noacli with ssh to remote hosts, it needs to work without asking for
+To use GUICLI with ssh to remote hosts, it needs to work without asking for
 a password.  There are two ways to do this.
 
 ### === Permanent authorization

@@ -12,7 +12,7 @@ The following features are displayed in noacli-big-screenshot.png:
   * fancy hilights
   * search docks
   * ls with --nh ?
-* noacli
+* GUICLI
   * history with exit values
   * commands that generated all windows shown
   * potential cluster command
