@@ -316,7 +316,7 @@ class Ui_noacli(object):
 
     def retranslateUi(self, noacli):
         _translate = QtCore.QCoreApplication.translate
-        noacli.setWindowTitle(_translate("noacli", "noacli"))
+        noacli.setWindowTitle(_translate("noacli", "GUICLI"))
         self.historyMenu.setTitle(_translate("noacli", "History"))
         self.menuViews.setTitle(_translate("noacli", "Views"))
         self.menuJobs.setTitle(_translate("noacli", "Jobs"))

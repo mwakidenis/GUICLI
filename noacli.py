@@ -3,7 +3,7 @@
 __license__   = 'GPL v3'
 __copyright__ = '2022-2026, Steven Dick <kg4ydw@gmail.com>'
 
-# The No Ampersand CLI shell
+# The GUICLI graphical command shell
 #
 # Do most things regular CLI shells do (except full parsing and turing
 # complete programming), but in a graphical interface.  Take full
@@ -163,7 +163,7 @@ class settings():
             self.dialog.close()
         except:
             pass
-        self.dialog = settingsDialog('Settings', model, 'noacli settings')
+        self.dialog = settingsDialog('Settings', model, 'GUICLI settings')
         self.dialog.finished.connect(self.acceptOrReject)
         tv = self.dialog.ui.tableView
         tv.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
@@ -687,7 +687,7 @@ class noacli(QtWidgets.QMainWindow):
         # XX add more simple buttons later?
 
     def setTitleFromWrap(self, title):
-        self.setWindowTitle('noacli: '+title)
+        self.setWindowTitle('GUICLI: '+title)
         # XX note: wayland may not update immeidately without activateWindow or sendEvent(QEvent.windowStateChange)
         # or this could be a Qt 6.4 bug
 
@@ -1291,7 +1291,7 @@ class noacli(QtWidgets.QMainWindow):
             if wins or procs:  # Handle these before shutting down
                 dialog = QMessageBox()
                 bcan = dialog.addButton(QMessageBox.StandardButton.Cancel)
-                bcan.setToolTip("Don't close noacli")
+                bcan.setToolTip("Don't close GUICLI")
                 bign = dialog.addButton(QMessageBox.StandardButton.Ignore)
                 bign.setToolTip("Ignore these and close anyway")
                 if wins:
@@ -1310,7 +1310,7 @@ class noacli(QtWidgets.QMainWindow):
                 self.recheckClose(dialog)  # set message
                 #dialog.setInformativeText(msg)
                 #dialog.setModality(Qt.WindowType.NonModal)
-                dialog.setWindowTitle("Quit noacli?")
+                dialog.setWindowTitle("Quit GUICLI?")
                 result = dialog.exec()
                 if result == QMessageBox.StandardButton.Cancel:
                     event.ignore()
@@ -1574,15 +1574,15 @@ class commandEditor(QPlainTextEdit):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    app.setOrganizationName("kg4ydw")
-    app.setApplicationName("noacli")
-    app.setDesktopFileName("org.kg4ydw.noacli")
-    # XX process noacli command line args (do to what?)
+    app.setOrganizationName("mwakidenis")
+    app.setApplicationName("GUICLI")
+    app.setDesktopFileName("org.mwakidenis.guicli")
+    # XX process GUICLI command line args (do to what?)
 
     mainwin = noacli(app)
     w = mainwin.ui
     if len(sys.argv)>1:
-        mainwin.setWindowTitle("noacli "+sys.argv[1])
+        mainwin.setWindowTitle("GUICLI "+sys.argv[1])
         
     mainwin.show()
     mainwin.start()

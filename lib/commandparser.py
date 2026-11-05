@@ -301,7 +301,7 @@ class commandParser:
     def cmd_version(self, title, outwin, rest):
         '''What version is am I?'''
         from noacli import __version__ # pylint: disable=C0415
-        v = f"Versions: noacli {__version__}, Qt {QT_VERSION_STR} PyQt {PYQT_VERSION_STR}, Python {sys.version}\n"
+        v = f"Versions: GUICLI {__version__}, Qt {QT_VERSION_STR} PyQt {PYQT_VERSION_STR}, Python {sys.version}\n"
         # get some environment stuff
         v+= f"Platform {QApplication.platformName()}\n"
         # XX tray icon: future feature

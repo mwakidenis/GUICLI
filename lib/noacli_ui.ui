@@ -16,9 +16,9 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="windowTitle">
-   <string>noacli</string>
-  </property>
+   <property name="windowTitle">
+    <string>GUICLI</string>
+   </property>
   <property name="dockNestingEnabled">
    <bool>true</bool>
   </property>
