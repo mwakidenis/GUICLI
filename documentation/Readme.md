@@ -1,4 +1,3 @@
-![GUICLI](../icons/noacli.png "icon")
 GUICLI: a smarter command-line experience
 
 This shell does most things regular CLI shells do (except full parsing

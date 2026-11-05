@@ -1,4 +1,3 @@
-![GUICLI](icons/noacli.png "icon")
 [GUICLI](https://github.com/mwakidenis/guicli): a smarter command-line experience
 
 GUICLI is a hybrid graphical and command-line shell that combines traditional
