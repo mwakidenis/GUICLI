@@ -1,5 +1,3 @@
-[GUICLI](https://github.com/mwakidenis/guicli): a smarter command-line experience
-
 GUICLI is a hybrid graphical and command-line shell that combines traditional
 command execution with interactive graphical tools for process management,
 output inspection, log monitoring, command history, saved searches and

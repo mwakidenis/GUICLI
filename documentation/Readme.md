@@ -1,5 +1,3 @@
-GUICLI: a smarter command-line experience
-
 This shell does most things regular CLI shells do (except full parsing
 and Turing complete programming), but in a graphical interface.
 GUICLI takes full advantage of having a GUI as much as possible,
