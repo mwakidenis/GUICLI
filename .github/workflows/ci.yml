@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Verify Python syntax of all modules
+        run: |
+          python -c "
+import py_compile, glob, sys
+files = ['noacli.py','qtail.py','tableviewer.py','progress.py'] + glob.glob('lib/*.py')
+failed = []
+for f in files:
+    try:
+        py_compile.compile(f, doraise=True)
+    except py_compile.PyCompileError as e:
+        failed.append((f, str(e)))
+if failed:
+    for f, e in failed:
+        print('FAIL', f, e)
+    sys.exit(1)
+print('All modules compile cleanly')
+          "
